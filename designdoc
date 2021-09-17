@@ -1,0 +1,11 @@
+Classes:
+  Assembler - In constructor creates a dictionary object with MIPS encoding
+  Reads in MIPS encoded file and stores in data structure (array of strings with each index being a new line)
+
+Methods:
+  MIPStoBinary - creates text file in binary
+  BinarytoHex - creates text file in hex
+  pseudoInstructions - handles MIPS psuedoinstructions
+  instructionsToBinary - convert MIPS instruction to binary
+  registerToBinary  - converts register number to binary
+  intToBinary - converts integers to Binary
