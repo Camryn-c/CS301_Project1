@@ -11,14 +11,17 @@
 #include "Assembler.h"
 
 using namespace std;
+
+
 //constructor
 //parameters: an input file used to read the asm file
 //creates a Dictionary
-Assembler::Assembler(string inputfile){
-  filename = inputfile;
+Assembler::Assembler(string inputfile, vector<string> binary, vector<string> hex){
+  this->filename = inputfile;
+  this->binary = binary;
+  this->hex = hex;
 
   mipsDictionary.insert({"add", "000000"});
-
   mipsDictionary.insert({"addi", "001000"}); //8
   mipsDictionary.insert({"sub", "000000"});
   mipsDictionary.insert({"mult", "000000"});
@@ -47,14 +50,14 @@ Assembler::Assembler(string inputfile){
   mipsDictionary.insert({"$a1", "00101"});
   mipsDictionary.insert({"$a2", "00110"});
   mipsDictionary.insert({"$a3", "00111"});
-  mipsDictionary.insert({"t0", "01000"});
-  mipsDictionary.insert({"t1", "01001"});
-  mipsDictionary.insert({"t2", "01010"});
-  mipsDictionary.insert({"t3", "01011"});
-  mipsDictionary.insert({"t4", "01100"});
-  mipsDictionary.insert({"t5", "01101"});
-  mipsDictionary.insert({"t6", "01110"});
-  mipsDictionary.insert({"$t7", "01111"});
+  mipsDictionary.insert({"$t0", "01000"});
+  mipsDictionary.insert({"$t1", "01001"});
+  mipsDictionary.insert({"$t2", "01010"});
+  mipsDictionary.insert({"$t3", "01011"});
+  mipsDictionary.insert({"$t4", "01100"});
+  mipsDictionary.insert({"$t5", "01101"});
+  mipsDictionary.insert({"$t6", "01110"});
+  mipsDictionary.insert({"$$t7", "01111"});
   mipsDictionary.insert({"$s0", "10000"});
   mipsDictionary.insert({"$s1", "10001"});
   mipsDictionary.insert({"$s2", "10010"});
@@ -103,6 +106,36 @@ Assembler::Assembler(string inputfile){
   mipsDictionary.insert({"$29", "11101"});
   mipsDictionary.insert({"$30", "11110"});
   mipsDictionary.insert({"$31", "11111"});
+  mipsDictionary.insert({"0x20", "100000"});
+  mipsDictionary.insert({"0x2a", "101010"});
+  mipsDictionary.insert({"0x22", "100010"});
+  mipsDictionary.insert({"0x12", "010010"});
+  mipsDictionary.insert({"0x10", "010000"});
+  mipsDictionary.insert({"0x1a", "011010"});
+  mipsDictionary.insert({"0x18", "011000"});
+  mipsDictionary.insert({"0x23", "100011"});
+  mipsDictionary.insert({"0x2b", "101011"});
+  mipsDictionary.insert({"0000", "0"});
+  mipsDictionary.insert({"0001", "1"});
+  mipsDictionary.insert({"0010", "2"});
+  mipsDictionary.insert({"0011", "3"});
+  mipsDictionary.insert({"0100", "4"});
+  mipsDictionary.insert({"0101", "5"});
+  mipsDictionary.insert({"0110", "6"});
+  mipsDictionary.insert({"0111", "7"});
+  mipsDictionary.insert({"1000", "8"});
+  mipsDictionary.insert({"1001", "9"});
+  mipsDictionary.insert({"1010", "A"});
+  mipsDictionary.insert({"1011", "B"});
+  mipsDictionary.insert({"1100", "C"});
+  mipsDictionary.insert({"1101", "D"});
+  mipsDictionary.insert({"1110", "E"});
+  mipsDictionary.insert({"1111", "F"});
+
+
+
+  //this->binary.push_back("null");
+  //hex.push_back("null");
 }
 
 //destuctor
@@ -111,9 +144,13 @@ Assembler::~Assembler(){
   hex.clear();
 }
 
+vector<string> Assembler::getBinary(){
+  return this->binary;
+}
+
 //convert asm instructions to its binary representation
 //parameters is the string asm instruction
-string instructionsToBinary(string instruction, map<string, string> mipsDictionary){
+string Assembler::instructionsToBinary(string instruction, map<string, string> mipsDictionary){
   if (mipsDictionary.count(instruction) > 0){
     string binary = mipsDictionary.at(instruction);
     return binary;
@@ -125,61 +162,161 @@ string instructionsToBinary(string instruction, map<string, string> mipsDictiona
 
 //coverts the asm register to its binary representation
 //parameters is a string asm register
-string registerToBinary(string registers, map<string, string> mipsDictionary){
-  string binary = mipsDictionary.at(registers);
+string Assembler::registerToBinary(string registers, map<string, string> mipsDictionary){
+  string binary = mipsDictionary[registers];
   return binary;
 }
 
 //converts the number to its binary representation
 //parameters is a string of the number
-string intToBinary(string number){
+string Assembler::intToBinary(string immediate){
   //stoi = string t
   //valueOf() --> string
+//  cout << "int to binary" <<endl;
   vector<char> binaryNum;
-  int num = stoi(number);
+  int num = stoi(immediate);
+  //cout << num << endl;
+  int og_num = num;
   string numbers;
-  while (num >= 0){
+//  cout << "before if" << endl;
+
+  if (num < 0){
+    num = num * -1;
+  }
+//  cout << "before while" << endl;
+
+  while (num > 0){
     if (num%2 == 1){
+    //  cout << num << endl;
       binaryNum.push_back('1');
-      num = num -1;
+      num = num - 1;
       num = num/2;
+      //cout << "in if after" << endl;
+
     }
     else{
+    //  cout << num << endl;
+
       binaryNum.push_back('0');
       num = num/2;
+      //cout << "in else after" << endl;
     }
-
-    for(int i=0; i<binaryNum.size(); i++){
-      numbers += binaryNum.at((binaryNum.size())-1);
+  }
+  //cout << "after while" << endl;
+  for (int j = binaryNum.size(); j<16; j++){
+    numbers += "0";
+  }
+  for(int i=1; i<=binaryNum.size(); i++){
+    numbers += binaryNum.at((binaryNum.size())-i);
+  }
+//  cout << "close to end" << endl;
+  if (og_num < 0){
+    //cout << "should not be here" << endl;
+    vector<char> negativeNum;
+    string inverse = "";
+    string one = "0000000000000001";
+    for(int x=0; x<numbers.length() ; x++){
+        if (numbers.substr(x,1) == "0"){
+          inverse += "1";
+        }
+        else{
+          inverse += "0";
+        }
     }
+    char carry ='0';
+    for(int y=one.length()-1; y<=0; y--){
+      if(inverse.substr(y,1)=="0" && one.substr(y,1)=="0" && carry == '0'){
+        negativeNum.push_back('0');
+      }
+      else if(inverse.substr(y,1)=="0" && one.substr(y,1)=="0" && carry == '1'){
+        negativeNum.push_back('1');
+      }
+      else if(inverse.substr(y,1)=="1" && one.substr(y,1)=="0" && carry == '0'){
+        negativeNum.push_back('1');
+      }
+      else if(inverse.substr(y,1)=="0" && one.substr(y,1)=="1" && carry == '0'){
+        negativeNum.push_back('1');
+      }
+      else if(inverse.substr(y,1)=="1" && one.substr(y,1)=="1" && carry == '0'){
+        negativeNum.push_back('0');
+        carry = '1';
+      }
+      else if(inverse.substr(y,1)=="1" && one.substr(y,1)=="0" && carry == '1'){
+        negativeNum.push_back('0');
+        carry = '1';
+      }
+      else if(inverse.substr(y,1)=="0" && one.substr(y,1)=="1" && carry == '1'){
+        negativeNum.push_back('0');
+        carry = '1';
+      }
+      else{
+        negativeNum.push_back('1');
+        carry = '1';
+      }
+    }
+    numbers = "";
+    for(int i=0; i<negativeNum.size(); i++){
+      numbers += negativeNum.at((negativeNum.size())-i);
+    }
+    return numbers;
+  }
+  else{
+  //  cout << "out of int to binary" <<endl;
+    return numbers;
 
   }
-  return numbers;
 }
 
-vector<string> split(string line, char delim){
+//splits a string based on the seperator given and also ignores commas
+//parameters string and a char deliminator
+//returns a vector containing the seperated string
+vector<string> Assembler::split(string line, char delim){
+//  cout << "in SPLIT" <<endl;
+//  cout << line << endl;
   vector<string> asm_line;
   string section;
   char comma = ',';
   int len = line.length();
+  cout << line.length() << endl;
   int i = 0;
   while (i < len){
     if(line[i] == comma){
       i++;
     }
-    else if(line[i]==delim){
+    else if(i == len-1){
+      section += line[i];
+      if(section != ""){
       asm_line.push_back(section);
+      }
       i++;
       section = "";
     }
+    else if(line[i]==delim){
+      //if(line[i-1]!= delim){ //&& line[i+1] != delim
+      if(section != ""){
+        asm_line.push_back(section);
+
+        section = "";
+      }
+      i++;
+    }
+    else if(line[i]=='#'){
+      i = len;
+    }
     else{
       section += line[i];
+      i++;
     }
+
+  }
+  //cout << "end SPLIT" <<endl;
+  for(int x =0; x < asm_line.size(); x++){
+      cout << asm_line.at(x) <<endl;
   }
   return asm_line;
 }
 
-void pseudoInstructions(vector<string> mips, vector<string> binary, map<string, string> mipsDictionary){
+void Assembler::pseudoInstructions(vector<string> mips, vector<string> binary, map<string, string> mipsDictionary){
 
 }
 
@@ -193,7 +330,7 @@ void pseudoInstructions(vector<string> mips, vector<string> binary, map<string, 
 //recive the binary and put it in one section of the vector
 //complete the file
 //return the vector
-vector<string> mipsToBinary(vector<string> binary, string filename, map<string, string> mipsDictionary){
+vector<string> Assembler::mipsToBinary(){
 //purple 000000 (add, sub, sll, srl, mult, div, jr, jal r, mflo, mfhi, syscall)
 //green 000101 = 5 bne
 //blue 000100 = 4 beq
@@ -202,18 +339,149 @@ vector<string> mipsToBinary(vector<string> binary, string filename, map<string, 
 //yello ox2b sw
 //addi 8
  //ofstream infile;
+// cout << "in mips to binary" <<endl;
  ifstream infile(filename);
  string line;
  while (getline(infile, line)){
    //line would be a string that has the line of asm
    //based on the binary of the instruction send it to a method that can handel similar formats
+   cout<< line << endl;
   vector<string> asm_line;
   char delim = ' ';
   asm_line = split(line, delim);
   string instruction = asm_line.at(0);
+//  cout << asm_line.at(0) << endl;
+  //cout << asm_line.at(1) << endl;
+  //cout << asm_line.at(2) << endl;
+  //cout << asm_line.at(3) << endl;
+
   string instructionBinary = instructionsToBinary(instruction, mipsDictionary);
   if (instructionBinary == "000000"){
     string binaryLine = instructionBinary;
+    if (instruction == "add" || instruction == "sub" || instruction == "slt"){
+    //  cout << instructionBinary <<endl;
+      string registers = asm_line.at(2);
+      //cout << registers <<endl;
+      string registerBinary = registerToBinary(registers, mipsDictionary);
+      //cout << registerBinary <<endl;
+      binaryLine.append(registerBinary);
+      registers = asm_line.at(3);
+      //cout << registers <<endl;
+      registerBinary = registerToBinary(registers, mipsDictionary);
+      //cout << registerBinary <<endl;
+      binaryLine.append(registerBinary);
+      registers = asm_line.at(1);
+      //cout << registers <<endl;
+      registerBinary = registerToBinary(registers, mipsDictionary);
+      //cout << registerBinary <<endl;
+      binaryLine.append(registerBinary);
+      //cout << instructionBinary <<endl;
+      binaryLine.append("00000");
+      //cout << instructionBinary <<endl;
+      if(instruction == "add"){
+        registerBinary = mipsDictionary["0x20"];
+        binaryLine.append(registerBinary);
+
+      }
+      else if(instruction == "slt"){
+        registerBinary = mipsDictionary["0x2a"];
+        binaryLine.append(registerBinary);
+      }
+      else{
+        registerBinary = mipsDictionary["0x22"];
+        binaryLine.append(registerBinary);
+        //add 0x21
+      }
+      binary.push_back(binaryLine);
+      //cout << "end of add" <<endl;
+    }
+    else if(instruction == "mflo"){ //|| instruction == "mfhi"){
+      cout << "in mflo method" << endl;
+      binaryLine.append("0000000000");
+      string registers = asm_line.at(1);
+      string registerBinary = registerToBinary(registers, mipsDictionary);
+      binaryLine.append(registerBinary);
+      binaryLine.append("00000");
+      if(instruction == "mflo"){
+        registerBinary = mipsDictionary["0x12"];
+        binaryLine.append(registerBinary);
+      //add 0x12
+      }
+      else{
+        registerBinary = mipsDictionary["0x10"];
+        binaryLine.append(registerBinary);
+        //add 0x10
+      }
+      binary.push_back(binaryLine);
+    }
+    else if(instruction == "div" || instruction == "mult"){
+      cout << "mult" <<endl;
+      string registers = asm_line.at(1);
+      string registerBinary = registerToBinary(registers, mipsDictionary);
+      binaryLine.append(registerBinary);
+      registers = asm_line.at(2);
+      registerBinary = registerToBinary(registers, mipsDictionary);
+      binaryLine.append(registerBinary);
+      binaryLine.append("00000000000");
+      if(instruction == "div"){
+        registerBinary = mipsDictionary["0x1a"];
+        binaryLine.append(registerBinary);
+      //add 0x1a
+      }
+      else{
+        registerBinary = mipsDictionary["0x18"];
+        binaryLine.append(registerBinary);
+        //add 0x18
+      }
+    }
+    else if(instruction == "sll"|| instruction == "srl"){
+      //add rs??
+      string registers = asm_line.at(2);
+      string registerBinary = registerToBinary(registers, mipsDictionary);
+      binaryLine.append(registerBinary);
+      registers = asm_line.at(1);
+      registerBinary = registerToBinary(registers, mipsDictionary);
+      binaryLine.append(registerBinary);
+      string number = asm_line.at(3);
+      string binaryNum = intToBinary(number);
+      binaryLine.append(binaryNum);
+      //add shamt
+      if (instruction == "sll"){
+        binaryLine.append("000000");
+      }
+      else{
+        binaryLine.append("000010");
+      }
+      binary.push_back(binaryLine);
+    }
+    else if (instruction == "jalr"){
+      string registers = asm_line.at(1);
+      string registerBinary = registerToBinary(registers, mipsDictionary);
+      binaryLine.append(registerBinary);
+      binaryLine.append("00000");
+      registers = asm_line.at(2);
+      registerBinary = registerToBinary(registers, mipsDictionary);
+      binaryLine.append(registerBinary);
+      binaryLine.append("00000");
+      binaryLine.append("001001");
+      binary.push_back(binaryLine);
+    }
+    else if(instruction == "jr"){
+      string registers = asm_line.at(1);
+      string registerBinary = registerToBinary(registers, mipsDictionary);
+      binaryLine.append(registerBinary);
+      binaryLine.append("000000000000000");
+      binaryLine.append("001000");
+      binary.push_back(binaryLine);
+    }
+
+    else if(instruction == "syscall"){
+      binaryLine.append("00000000000000000000");
+      string registerBinary = mipsDictionary["0x18"];
+      binaryLine.append(registerBinary);
+      //add 0x18
+      binary.push_back(binaryLine);
+    }
 
   } //if it equals 000000 (add, sub, sll, srl, mult, div, jr, jal r, mflo, mfhi, syscall)
   else if (instructionBinary == "000101") //bne
@@ -225,7 +493,6 @@ vector<string> mipsToBinary(vector<string> binary, string filename, map<string, 
     string register2 = asm_line.at(2);
     registerBinary = registerToBinary(register2, mipsDictionary);
     binaryLine.append(registerBinary);
-
 
     //i dont know what to do with label
     binary.push_back(binaryLine);
@@ -255,7 +522,10 @@ vector<string> mipsToBinary(vector<string> binary, string filename, map<string, 
   }
   else if (instructionBinary == "001000") //addi
   {
+    //cout << "in addi" <<endl;
     string binaryLine = instructionBinary;
+    //cout << "binaryLine: "<< binaryLine <<endl;
+
     string register1 = asm_line.at(2);
     string registerBinary = registerToBinary(register1, mipsDictionary);
     binaryLine.append(registerBinary);
@@ -265,35 +535,84 @@ vector<string> mipsToBinary(vector<string> binary, string filename, map<string, 
     string number = asm_line.at(3);
     string binaryNum = intToBinary(number);
     binaryLine.append(binaryNum);
-
+    //cout << "binaryLine: "<< binaryLine <<endl;
+    binary.push_back(binaryLine);
   }
-  else if (instructionBinary == "0x23") //lw
+  else if (instructionBinary == "0x23" || instructionBinary == "0x2b") //lw and sw
   {
-    string binaryLine = instructionBinary;
-
-  }
-  else if (instructionBinary == "0x2b") //sw
-  {
-    string binaryLine = instructionBinary;
+    string offset;
+    string register1;
+    string binaryLine = mipsDictionary[instructionBinary];
+    string registers = asm_line.at(2);
+    for(int i =0; i < registers.length(); i++){
+      if(registers[i]=='('){
+        offset = registers.substr(0, i); //number
+        register1 = registers.substr(i+1, 3);
+        i = registers.length();
+      }
+    }
+    string registerBinary = registerToBinary(register1, mipsDictionary);
+    binaryLine.append(registerBinary);
+    string register2 = asm_line.at(1);
+    registerBinary = registerToBinary(register2, mipsDictionary);
+    binaryLine.append(registerBinary);
+    binaryLine.append(intToBinary(offset));
 
   }
   else{//instructionBinary == "null"
-    pseudoInstructions(asm_line, binary, mipsDictionary);
+    //pseudoInstructions(asm_line, binary, mipsDictionary);
   }
 
 }
 infile.close();
+cout << binary.size() << endl;
+
+//for(int x =0; x<binary.size(); x++){
+  //cout << binary[x] << endl;
+//}
 return binary;
 }
 
 
-void binaryToHex(vector<string> binary, vector<string> hex, map<string, string> mipsDictionary){
+vector<string> binaryToHex(vector<string> binary, vector<string> hex, map<string, string> mipsDictionary){
+  string segment;
+  string index;
+  string hexNum;
 
+    // loop for binary vector
+  for(int k = 0; k < binary.size(); k++){
+    index = binary.at(k);
+    hexNum = "";
+
+    // loop for each index
+    for(int i = 0; i < index.size(); i+=4){
+      segment = "";
+
+        // loop for seperation by 4
+      for(int j = 0; j < 4; j++){
+        segment += index.at(i+j);
+      }
+      hexNum += mipsDictionary.at(segment);
+
+    }
+    hex.push_back(hexNum);     // add hex to vector
+  }
+  return hex;
 }
 
 
 
 
-int main(){
 
+
+int main(int argc, char* argv[]){
+  vector<string> binary;
+  vector<string> hex;
+  Assembler asm_one(argv[1], binary, hex);
+  vector<string> answer = asm_one.mipsToBinary();
+  cout << "in main" << endl;
+  cout << answer.size() << endl;
+  for(int x =0; x<answer.size(); x++){
+    cout << answer[x] << endl;
+  }
 }

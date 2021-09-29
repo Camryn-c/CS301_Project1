@@ -11,20 +11,20 @@
 using namespace std;
 
 class Assembler{
-  private:
+
+  public:
     string filename;
     vector<string> binary;
     vector<string> hex;
-
-
-  public:
     map<string, string> mipsDictionary;
 
-    Assembler(string inputfile);
+    Assembler(string inputfile, vector<string> binary, vector<string> hex);
     ~Assembler();
 
-    vector<string> mipsToBinary(vector<string> binary, map<string, string> mipsDictionary);
-    void binaryToHex(vector<string> binary, vector<string> hex, map<string, string> mipsDictionary);
+    vector<string> getBinary();
+
+    vector<string> mipsToBinary(); //vector<string> binary, map<string, string> mipsDictionary
+    vector<string> binaryToHex(vector<string> binary, vector<string> hex, map<string, string> mipsDictionary);
     void pseudoInstructions(vector<string> mips, vector<string> binary, map<string, string> mipsDictionary);
 
     vector<string> split(string line, char delim);
