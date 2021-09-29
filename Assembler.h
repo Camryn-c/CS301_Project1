@@ -27,7 +27,7 @@ class Assembler{
     vector<string> binaryToHex(vector<string> binary, vector<string> hex, map<string, string> mipsDictionary);
     void pseudoInstructions(vector<string> mips, vector<string> binary, map<string, string> mipsDictionary);
 
-    vector<string> split(string line, char delim);
+    vector<string> split(string line);
     string instructionsToBinary(string instruction, map<string, string> mipsDictionary);
     string registerToBinary(string registers, map<string, string> mipsDictionary);
     string intToBinary(string number);

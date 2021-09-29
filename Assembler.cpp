@@ -163,7 +163,9 @@ string Assembler::instructionsToBinary(string instruction, map<string, string> m
 //coverts the asm register to its binary representation
 //parameters is a string asm register
 string Assembler::registerToBinary(string registers, map<string, string> mipsDictionary){
+  //cout << "register =" << registers <<"length" << registers.length()<< endl;
   string binary = mipsDictionary[registers];
+  //cout << "string = " << binary << " length " << binary.length() << endl;
   return binary;
 }
 
@@ -257,6 +259,7 @@ string Assembler::intToBinary(string immediate){
     numbers = "";
     for(int i=0; i<negativeNum.size(); i++){
       numbers += negativeNum.at((negativeNum.size())-i);
+      cout << numbers << " negative" << endl;
     }
     return numbers;
   }
@@ -270,14 +273,15 @@ string Assembler::intToBinary(string immediate){
 //splits a string based on the seperator given and also ignores commas
 //parameters string and a char deliminator
 //returns a vector containing the seperated string
-vector<string> Assembler::split(string line, char delim){
+vector<string> Assembler::split(string line){
 //  cout << "in SPLIT" <<endl;
 //  cout << line << endl;
-  vector<string> asm_line;
+  /*vector<string> asm_line;
   string section;
   char comma = ',';
   int len = line.length();
-  cout << line.length() << endl;
+  //cout << line.length() << endl;
+  //maybe try a for loop
   int i = 0;
   while (i < len){
     if(line[i] == comma){
@@ -285,19 +289,20 @@ vector<string> Assembler::split(string line, char delim){
     }
     else if(i == len-1){
       section += line[i];
-      if(section != ""){
-      asm_line.push_back(section);
+      if(section.length() != 0 && line[i] != ' '){
+        //cout << "in spilt: " << section << section.length() << endl;
+        asm_line.push_back(section);
       }
       i++;
       section = "";
     }
     else if(line[i]==delim){
       //if(line[i-1]!= delim){ //&& line[i+1] != delim
-      if(section != ""){
+      if(section.length() != 0){
+        //cout <<  section << "in spilt: " << section.length() << endl;
         asm_line.push_back(section);
-
-        section = "";
       }
+      section = "";
       i++;
     }
     else if(line[i]=='#'){
@@ -308,19 +313,75 @@ vector<string> Assembler::split(string line, char delim){
       i++;
     }
 
-  }
+  }*/
   //cout << "end SPLIT" <<endl;
+
+  /*
   for(int x =0; x < asm_line.size(); x++){
-      cout << asm_line.at(x) <<endl;
+    if (asm_line.at(x).length() == 4){
+      cout << asm_line.at(x).substr(3,1) << endl;
+    }
+  }*/
+  string delim = " ";
+  vector<string> words;
+  size_t pos = 0;
+  string section;
+  string lineCopy;
+
+  int i = 0;
+  while(i < line.length()){
+    cout<< "while1" << endl;
+
+    if(line[i] == '#'){
+      i = line.length();
+    }
+    else if(line[i] != ','){
+      if(line[i] == ' '){
+        if(i == line.length()-1 || line[i+1] == '#'){
+          i = line.length();
+        }
+        else{
+          lineCopy += line[i];
+        }
+      }
+      else{
+        lineCopy += line[i];
+      }
+    }
+    i++;
   }
-  return asm_line;
+
+ pos = lineCopy.find(delim);
+  while(pos != -1){
+    cout<< "while" << endl;
+    words.push_back(lineCopy.substr(0,pos));
+    lineCopy.erase(0, pos + delim.length());
+    pos = lineCopy.find(delim);
+  }
+  words.push_back(lineCopy.substr(0,pos));
+
+
+
+  for(int x =0; x < words.size(); x++){
+
+      cout << words.at(x) << endl;
+  }
+  string temp = words.at(words.size()-1);
+  temp.erase(temp.length()-1);
+  words.pop_back();
+  words.push_back(temp);
+
+  cout << (words.at(words.size()-1)).length() << endl;
+
+
+  return words;
 }
 
 void Assembler::pseudoInstructions(vector<string> mips, vector<string> binary, map<string, string> mipsDictionary){
 
 }
 
-//converts the asm code into binary
+// the asm code into binary
 //parameters a vector to hold the translated binary, Dictionary to translate the asm instructions and registers to binary
 //paramerers continued filename so that the method can read the asm file
 //open the filename
@@ -345,10 +406,10 @@ vector<string> Assembler::mipsToBinary(){
  while (getline(infile, line)){
    //line would be a string that has the line of asm
    //based on the binary of the instruction send it to a method that can handel similar formats
-   cout<< line << endl;
+   //cout<< line << endl;
   vector<string> asm_line;
   char delim = ' ';
-  asm_line = split(line, delim);
+  asm_line = split(line);
   string instruction = asm_line.at(0);
 //  cout << asm_line.at(0) << endl;
   //cout << asm_line.at(1) << endl;
@@ -366,9 +427,9 @@ vector<string> Assembler::mipsToBinary(){
       //cout << registerBinary <<endl;
       binaryLine.append(registerBinary);
       registers = asm_line.at(3);
-      //cout << registers <<endl;
+      //cout << "number 3 " << registers <<endl;
       registerBinary = registerToBinary(registers, mipsDictionary);
-      //cout << registerBinary <<endl;
+      //cout << "number 3 " << registerBinary <<endl;
       binaryLine.append(registerBinary);
       registers = asm_line.at(1);
       //cout << registers <<endl;
@@ -396,7 +457,7 @@ vector<string> Assembler::mipsToBinary(){
       //cout << "end of add" <<endl;
     }
     else if(instruction == "mflo"){ //|| instruction == "mfhi"){
-      cout << "in mflo method" << endl;
+      //cout << "in mflo method" << endl;
       binaryLine.append("0000000000");
       string registers = asm_line.at(1);
       string registerBinary = registerToBinary(registers, mipsDictionary);
