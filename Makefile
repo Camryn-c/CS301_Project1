@@ -3,9 +3,9 @@
 CC = g++
 CC_FLAG = -std=c++17 -Wall -Wno-deprecated -Werror=return-type -g
 OBJS = Assembler.o
-EXECS = assembler
+EXECS = ASSEMBLE
 
-assembler : $(OBJS)
+ASSEMBLE : $(OBJS)
 	$(CC) $(CC_FLAG) $^ -o $@
 
 %.o : %.cpp *.h

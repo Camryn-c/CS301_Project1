@@ -13,24 +13,24 @@ using namespace std;
 class Assembler{
 
   public:
+    int lineCounter;
     string filename;
+    string outfile;
     vector<string> binary;
     vector<string> hex;
     map<string, string> mipsDictionary;
 
-    Assembler(string inputfile, vector<string> binary, vector<string> hex);
+    Assembler(string inputfile, string outputfile);
     ~Assembler();
 
-    vector<string> getBinary();
-    
-
-    vector<string> mipsToBinary(); //vector<string> binary, map<string, string> mipsDictionary
-    vector<string> binaryToHex(vector<string> binary, vector<string> hex, map<string, string> mipsDictionary);
-    void pseudoInstructions(vector<string> mips, vector<string> binary, map<string, string> mipsDictionary);
+    map<string, int> findLabels();
+    vector<string> mipsToBinary();
+    vector<string> binaryToHex();
+    void pseudoInstructions();
 
     vector<string> split(string line);
-    string instructionsToBinary(string instruction, map<string, string> mipsDictionary);
-    string registerToBinary(string registers, map<string, string> mipsDictionary);
+    string instructionsToBinary(string instruction);
+    string registerToBinary(string registers);
     string intToBinary(string number);
 
 
