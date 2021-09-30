@@ -231,7 +231,7 @@ string Assembler::intToBinary(string immediate){
           inverse += "0";
         }
     }
-
+    cout << inverse << endl;
     char carry ='0';
     int oneLen = one.length()-1;
     for(int y=one.length()-1; y>=0; y--){
@@ -240,6 +240,7 @@ string Assembler::intToBinary(string immediate){
       }
       else if(inverse.substr(y,1)=="0" && one.substr(y,1)=="0" && carry == '1'){
         negativeNum.push_back('1');
+        carry = '0';
       }
       else if(inverse.substr(y,1)=="1" && one.substr(y,1)=="0" && carry == '0'){
         negativeNum.push_back('1');
@@ -289,7 +290,6 @@ vector<string> Assembler::split(string line){
   vector<string> words;
   size_t pos = 0;
   string lineCopy;
-  line += " #remove";
   cout << line<< endl;
   // removes commas and comments from the line
   int i = 0;
@@ -297,46 +297,76 @@ vector<string> Assembler::split(string line){
     i++;
   }
   while(i < line.length()){
-    //cout<< "while1" << endl;
+    cout<< "while1" << endl;
 
     /*if(line[i] == '#'){
       break;
     }*/
     if(line[i] != ','){
-      if(line[i] == ' ' && i == line.length()-1){
-          break;
+      cout << line[i] << endl;
+      if(i == line.length()-1){
+        cout << "break" << endl;
+        break;
+        }
+      else if(line[i] == ' ' && i != line.length()-1){
+        cout<< i << endl;
+        if(line[i+1] == '#'){
+          i++;
         }
         else{
           lineCopy += line[i];
+          i++;
         }
       }
-
+      else{
+        lineCopy += line[i];
+        i++;
+      }
+    }
+    else{
       i++;
     }
-
+  }
+cout << lineCopy << endl;
+cout<< "out of while1" << endl;
 // seperates the line by whitespace
  pos = lineCopy.find(delim);
+ cout<< pos << endl;
   while(pos != -1){
-    //cout<< "while" << endl;
+    cout<< "while" << endl;
     words.push_back(lineCopy.substr(0,pos));
     lineCopy.erase(0, pos + 1);
     pos = lineCopy.find(delim);
   }
   words.push_back(lineCopy.substr(0,pos));
   int vectorLen =  words.size();
+  string newString;
   for (int x =0; x< vectorLen; x++){
+    cout << "in for" << endl;
     string temp = words.at(x);
     int stringLen = temp.length();
     for (int y = 0; y < stringLen; y++){
       if(temp[y]=='#'){
-        for(int i =0; i<(vectorLen -x); i++){
-          words.pop_back();
+        for(int i =0; i<y; i++){
+          newString += temp[i];
+          cout << "y: " << y <<" i: "<<i << temp[i] << endl;
         }
+        cout << "vector Len" << vectorLen << endl;
+        cout << "len - y" <<vectorLen-y << endl;
+        for(int a =0; a<(vectorLen-x); a++){
+          words.pop_back();
+          cout << "times" << endl;
+        }
+        cout << "end before add: "<< words.at(words.size()-1) << endl;
+        //words.pop_back();
+        words.push_back(newString);
         y = stringLen;
         x = vectorLen;
+        cout << "end after add: "<< words.at(words.size()-1) << endl;
       }
     }
   }
+
 
   // gets rid of extra spaces at the end of line
   //string temp = words.at(words.size()-1);
@@ -415,7 +445,7 @@ vector<string> Assembler::mipsToBinary(){
       binaryLine.append(registerBinary);
       registers = asm_line.at(3);
       //cout << "number 3 " << registers <<endl;
-      registerBinary = registerToBinary(registers.substr(0, registers.length()-1), mipsDictionary);
+      registerBinary = registerToBinary(registers, mipsDictionary);
       //cout << "number 3 " << registerBinary <<endl;
       binaryLine.append(registerBinary);
       registers = asm_line.at(1);
@@ -447,7 +477,7 @@ vector<string> Assembler::mipsToBinary(){
       //cout << "in mflo method" << endl;
       binaryLine.append("0000000000");
       string registers = asm_line.at(1);
-      string registerBinary = registerToBinary(registers.substr(0, registers.length()-1), mipsDictionary);
+      string registerBinary = registerToBinary(registers, mipsDictionary);
       binaryLine.append(registerBinary);
       binaryLine.append("00000");
       if(instruction == "mflo"){
@@ -468,7 +498,7 @@ vector<string> Assembler::mipsToBinary(){
       string registerBinary = registerToBinary(registers, mipsDictionary);
       binaryLine.append(registerBinary);
       registers = asm_line.at(2);
-      registerBinary = registerToBinary(registers.substr(0, registers.length()-1), mipsDictionary);
+      registerBinary = registerToBinary(registers, mipsDictionary);
       binaryLine.append(registerBinary);
       binaryLine.append("0000000000");
       if(instruction == "div"){
@@ -510,7 +540,7 @@ vector<string> Assembler::mipsToBinary(){
       binaryLine.append(registerBinary);
       binaryLine.append("00000");
       registers = asm_line.at(2);
-      registerBinary = registerToBinary(registers.substr(0, registers.length()-1), mipsDictionary);
+      registerBinary = registerToBinary(registers, mipsDictionary);
       binaryLine.append(registerBinary);
       binaryLine.append("00000");
       binaryLine.append("001001");
@@ -518,7 +548,7 @@ vector<string> Assembler::mipsToBinary(){
     }
     else if(instruction == "jr"){
       string registers = asm_line.at(1);
-      string registerBinary = registerToBinary(registers.substr(0, registers.length()-1), mipsDictionary);
+      string registerBinary = registerToBinary(registers, mipsDictionary);
       binaryLine.append(registerBinary);
       binaryLine.append("000000000000000");
       binaryLine.append("001000");
@@ -541,7 +571,7 @@ vector<string> Assembler::mipsToBinary(){
     string registerBinary = registerToBinary(registers, mipsDictionary);
     binaryLine.append(registerBinary);
     string register2 = asm_line.at(2);
-    registerBinary = registerToBinary(register2.substr(0, registers.length()-1), mipsDictionary);
+    registerBinary = registerToBinary(register2, mipsDictionary);
     binaryLine.append(registerBinary);
 
     //i dont know what to do with label
@@ -554,7 +584,7 @@ vector<string> Assembler::mipsToBinary(){
     string registerBinary = registerToBinary(registers, mipsDictionary);
     binaryLine.append(registerBinary);
     string register2 = asm_line.at(2);
-    registerBinary = registerToBinary(register2.substr(0, registers.length()-1), mipsDictionary);
+    registerBinary = registerToBinary(register2, mipsDictionary);
     binaryLine.append(registerBinary);
 
     //do something with label
