@@ -22,6 +22,7 @@ class Assembler{
     ~Assembler();
 
     vector<string> getBinary();
+    
 
     vector<string> mipsToBinary(); //vector<string> binary, map<string, string> mipsDictionary
     vector<string> binaryToHex(vector<string> binary, vector<string> hex, map<string, string> mipsDictionary);
