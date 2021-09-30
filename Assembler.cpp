@@ -21,6 +21,7 @@ Assembler::Assembler(string inputfile, vector<string> binary, vector<string> hex
   this->binary = binary;
   this->hex = hex;
 
+
   mipsDictionary.insert({"add", "000000"});
   mipsDictionary.insert({"addi", "001000"}); //8
   mipsDictionary.insert({"sub", "000000"});
@@ -274,104 +275,64 @@ string Assembler::intToBinary(string immediate){
 //parameters string and a char deliminator
 //returns a vector containing the seperated string
 vector<string> Assembler::split(string line){
-//  cout << "in SPLIT" <<endl;
-//  cout << line << endl;
-  /*vector<string> asm_line;
-  string section;
-  char comma = ',';
-  int len = line.length();
-  //cout << line.length() << endl;
-  //maybe try a for loop
-  int i = 0;
-  while (i < len){
-    if(line[i] == comma){
-      i++;
-    }
-    else if(i == len-1){
-      section += line[i];
-      if(section.length() != 0 && line[i] != ' '){
-        //cout << "in spilt: " << section << section.length() << endl;
-        asm_line.push_back(section);
-      }
-      i++;
-      section = "";
-    }
-    else if(line[i]==delim){
-      //if(line[i-1]!= delim){ //&& line[i+1] != delim
-      if(section.length() != 0){
-        //cout <<  section << "in spilt: " << section.length() << endl;
-        asm_line.push_back(section);
-      }
-      section = "";
-      i++;
-    }
-    else if(line[i]=='#'){
-      i = len;
-    }
-    else{
-      section += line[i];
-      i++;
-    }
 
-  }*/
-  //cout << "end SPLIT" <<endl;
-
-  /*
-  for(int x =0; x < asm_line.size(); x++){
-    if (asm_line.at(x).length() == 4){
-      cout << asm_line.at(x).substr(3,1) << endl;
-    }
-  }*/
-  string delim = " ";
+  char delim = ' ';
   vector<string> words;
   size_t pos = 0;
-  string section;
   string lineCopy;
 
+  // removes commas and comments from the line
   int i = 0;
   while(i < line.length()){
-    cout<< "while1" << endl;
+    //cout<< "while1" << endl;
 
     if(line[i] == '#'){
-      i = line.length();
+      break;
     }
-    else if(line[i] != ','){
-      if(line[i] == ' '){
-        if(i == line.length()-1 || line[i+1] == '#'){
-          i = line.length();
+    if(line[i] != ','){
+      if(line[i] == ' ' && i == line.length()-1){
+          break;
         }
         else{
           lineCopy += line[i];
         }
       }
-      else{
-        lineCopy += line[i];
-      }
-    }
-    i++;
-  }
 
+      i++;
+    }
+
+// seperates the line by whitespace
  pos = lineCopy.find(delim);
   while(pos != -1){
-    cout<< "while" << endl;
+    //cout<< "while" << endl;
     words.push_back(lineCopy.substr(0,pos));
-    lineCopy.erase(0, pos + delim.length());
+    lineCopy.erase(0, pos + 1);
     pos = lineCopy.find(delim);
   }
   words.push_back(lineCopy.substr(0,pos));
 
 
+  // gets rid of extra spaces at the end of line
+  string temp = words.at(words.size()-1);
+  if(temp == ""){
+    words.pop_back();
+  }
+  /*
+  if(temp.at(temp.length()-1) == ' '){
+    temp.erase(temp.length()-1);
+    words.pop_back();
+    words.push_back(temp);
+  }*/
 
   for(int x =0; x < words.size(); x++){
 
       cout << words.at(x) << endl;
   }
-  string temp = words.at(words.size()-1);
-  temp.erase(temp.length()-1);
-  words.pop_back();
-  words.push_back(temp);
 
-  cout << (words.at(words.size()-1)).length() << endl;
+
+
+//  cout << words.at(words.size()-1) << "size:"<<(words.at(words.size()-1)).size() << endl;
+//  cout << (words.at(words.size()-1)).length() << endl;
 
 
   return words;
@@ -635,7 +596,7 @@ return binary;
 }
 
 
-vector<string> binaryToHex(vector<string> binary, vector<string> hex, map<string, string> mipsDictionary){
+vector<string> Assembler::binaryToHex(vector<string> binary, vector<string> hex, map<string, string> mipsDictionary){
   string segment;
   string index;
   string hexNum;
@@ -664,15 +625,13 @@ vector<string> binaryToHex(vector<string> binary, vector<string> hex, map<string
 
 
 
-
-
 int main(int argc, char* argv[]){
   vector<string> binary;
   vector<string> hex;
   Assembler asm_one(argv[1], binary, hex);
   vector<string> answer = asm_one.mipsToBinary();
-  cout << "in main" << endl;
-  cout << answer.size() << endl;
+
+//  answer = asm_one.binaryToHex(answer,hex, asm_one.mipsDictionary);
   for(int x =0; x<answer.size(); x++){
     cout << answer[x] << endl;
   }
